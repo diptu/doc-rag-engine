@@ -31,7 +31,7 @@ This roadmap outlines the systematic development of a high-fidelity Document Und
 
 ---
 
-### 📍 Phase 2:bRetrieval Layer
+### 📍 Phase 2: Retrieval Layer
 
 **Objective:** Establish a high-performance vector search mechanism for semantic evidence retrieval.
 
