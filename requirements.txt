@@ -1,0 +1,6 @@
+pymupdf
+pytesseract
+pillow
+pytest
+pytest-cov
+mypy

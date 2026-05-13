@@ -1,0 +1,114 @@
+version: '3'
+
+tasks:
+
+  init:
+    desc: "Initialize project structure and create Phase 1 components"
+    cmds:
+      - echo "🚀 Setting up doc-rag-engine structure..."
+
+      # App structure
+      - mkdir -p app/{processing,retrieval,generation,feedback,api}
+      - mkdir -p data/{raw,processed,feedback}
+      - mkdir -p tests/files
+
+      # __init__ files for package recognition
+      - touch app/__init__.py
+      - touch app/processing/__init__.py
+      - touch app/retrieval/__init__.py
+      - touch app/generation/__init__.py
+      - touch app/feedback/__init__.py
+      - touch app/api/__init__.py
+      - touch tests/__init__.py
+
+      # Core app files
+      - touch app/main.py
+      - touch app/api/routes.py
+
+      # Phase 1: Processing Components
+      - touch app/processing/loader.py
+      - touch app/processing/chunker.py
+      - touch app/processing/cleaner.py
+
+      # Phase 2: Retrieval Components
+      - touch app/retrieval/embedder.py
+      - touch app/retrieval/vector_store.py
+
+      # Phase 3: Generation Components
+      - touch app/generation/prompt.py
+      - touch app/generation/generator.py
+
+      # Phase 4: Feedback Components
+      - touch app/feedback/store.py
+      - touch app/feedback/analyzer.py
+
+      # Config and Environment
+      - touch pyproject.toml
+      - touch pytest.ini
+      - touch .env.example
+      - touch .gitignore
+
+      # Generate sample PDFs for testing
+      - echo "📄 Creating sample PDF files..."
+      - |
+        python - <<EOF
+        import fitz, os
+        os.makedirs("tests/files", exist_ok=True)
+        # Multipage PDF
+        doc = fitz.open()
+        p1 = doc.new_page()
+        p1.insert_text((72, 72), "This is page one")
+        p2 = doc.new_page()
+        p2.insert_text((72, 72), "This is page two")
+        doc.save("tests/files/multipage.pdf")
+        doc.close()
+        # Single-page PDF
+        doc = fitz.open()
+        p = doc.new_page()
+        p.insert_text((72, 72), "This is a single page document")
+        doc.save("tests/files/single_page.pdf")
+        doc.close()
+        print("✅ Sample PDFs created in tests/files/")
+        EOF
+
+      - echo "✅ Phase 1 Directory Structure Ready."
+
+  dev:
+    desc: "Run FastAPI dev server"
+    cmds:
+      - uvicorn app.main:app --reload
+
+  install:
+    desc: "Install dependencies from requirements.txt"
+    cmds:
+      - pip install -r requirements.txt
+
+  test:
+    desc: "Run pytest test suite with verbose output"
+    cmds:
+      - python -m pytest -vv
+
+  test-cov:
+    desc: "Run pytest with coverage report"
+    cmds:
+      - pytest --cov=app --cov-report=term-missing
+
+  lint:
+    desc: "Run mypy type checking"
+    cmds:
+      - python -m mypy app tests
+
+  clean:
+    desc: "Remove cache files and temporary artifacts"
+    cmds:
+      - find . -type d -name "__pycache__" -exec rm -r {} +
+      - find . -type d -name ".pytest_cache" -exec rm -r {} +
+      - find . -type d -name ".mypy_cache" -exec rm -r {} +
+      - find . -type f -name "*.pyc" -delete
+
+  reset-data:
+    desc: "Clear processed and feedback data"
+    cmds:
+      - rm -rf data/processed/*
+      - rm -rf data/feedback/*
+      - echo "🧹 Data stores cleared."
