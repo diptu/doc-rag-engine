@@ -11,3 +11,5 @@ numpy
 sentence-transformers
 faiss-cpu
 torch
+tiktoken 
+pydantic
