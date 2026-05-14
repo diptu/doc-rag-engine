@@ -1,0 +1,13 @@
+file : https://arxiv.org/pdf/1706.03762
+
+/retrieve
+"What is the formula for Scaled Dot-Product Attention?"
+/generate
+"Explain the role of Multi-Head Attention in the Transformer encoder.",
+
+/submit
+"interaction_id": "transformer_formula_check_001",
+  "query": "What is the formula for Scaled Dot-Product Attention?",
+  "original_draft": "The formula involves using dot products between queries and keys to weight the values.",
+  "edited_version": "The formula is Attention(Q, K, V) = softmax((QK^T) / sqrt(d_k))V. It uses a scaling factor of 1/sqrt(d_k) to prevent dot products from growing too large in magnitude for the softmax function.",
+  "context_ids": ["1706.03762v7.pdf_page_4_chunk_1", "1706.03762v7.pdf_page_4_chunk_5"] ( comming from retribal phase)

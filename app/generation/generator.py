@@ -15,7 +15,7 @@ class RAGGenerator:
     ):
         """
         Args:
-            model_client: The LLM client (e.g., OpenAI).
+            model_client: The AsyncOpenAI client instance.
             model_name: Name of the model for tokenization logic.
             token_limit: Maximum allowed tokens for the context injection.
         """
@@ -33,8 +33,7 @@ class RAGGenerator:
 
     def _format_context(self, retrieved_chunks: List[Dict[str, Any]]) -> str:
         """
-        Orchestrates retrieved chunks and applies token-based truncation
-        to stay within the engineering constraints of the LLM.
+        Orchestrates retrieved chunks and applies token-based truncation.
         """
         formatted_chunks = []
         current_tokens = 0
@@ -43,8 +42,11 @@ class RAGGenerator:
         effective_limit = self.token_limit - 500
 
         for i, chunk in enumerate(retrieved_chunks):
-            chunk_id = chunk.get("metadata", {}).get("source_id", f"idx_{i}")
+            # Ensure we safely access the content and metadata
             content = chunk.get("content", "")
+            # Handle both raw chunks and FAISS result structures
+            meta = chunk.get("metadata", {})
+            chunk_id = meta.get("source_id", f"idx_{i}")
 
             formatted_entry = f"[Source: {chunk_id}] Content: {content}"
             entry_tokens = self._count_tokens(formatted_entry)
@@ -58,11 +60,11 @@ class RAGGenerator:
 
         return "\n\n".join(formatted_chunks)
 
-    def generate(
+    async def generate(
         self, query: str, retrieved_chunks: List[Dict[str, Any]]
     ) -> GenerationResponse:
         """
-        Orchestration flow: Context Injection -> LLM Inference -> Pydantic Validation.
+        Orchestration flow: Context Injection -> Async LLM Inference -> Pydantic Validation.
         """
         context_text = self._format_context(retrieved_chunks)
 
@@ -72,17 +74,18 @@ class RAGGenerator:
         )
 
         try:
-            # LLM Call with Strict JSON Mode
-            response = self.client.chat.completions.create(
+            # FIX: Added 'await' for the asynchronous OpenAI call
+            response = await self.client.chat.completions.create(
                 model=self.model_name,
                 messages=[
                     {"role": "system", "content": RAG_SYSTEM_PROMPT},
                     {"role": "user", "content": user_content},
                 ],
                 response_format={"type": "json_object"},
-                temperature=0.1,  # Low temperature for grounded engineering tasks
+                temperature=0.1,
             )
 
+            # Extract content from the awaited response object
             raw_content = response.choices[0].message.content
             parsed_data = json.loads(raw_content)
 
