@@ -1,0 +1,27 @@
+# Project information
+site_name: LegalDoc AI Engine
+site_url: https://github.com/doc-rag-engine
+site_author: Nazmul Alam
+site_description: >-
+  My digital laboratory for mastering ML/DL, system Design, DSA through regular practice in multiple programming language.
+
+theme:
+  name: readthedocs
+  highlightjs: true
+
+plugins:
+    - search
+    - mermaid2
+nav:
+  - Overview: index.md
+  - Technology Stack: stack.md
+  - Architecture: architecture.md
+  - Core Pipeline:
+      - Document Processing: pipeline/processing.md
+      - Grounded Retrieval: pipeline/retrieval.md
+      - Draft Generation: pipeline/generation.md
+  - Learning Loop: feedback.md
+  - Evaluation & Results: evaluation.md
+  - A ssumptions and tradeoffs: assumptions_tradeoffs.md
+  - Examples : samples.md
+  - Setup Guide: setup.md

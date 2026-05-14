@@ -10,9 +10,12 @@ python-multipart
 numpy
 sentence-transformers
 faiss-cpu
+--extra-index-url https://download.pytorch.org/whl/cpu
 torch
 tiktoken 
 pydantic
 pytest-asyncio
 openai
 python-dotenv
+mkdocs
+mkdocs-mermaid2-plugin

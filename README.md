@@ -101,3 +101,8 @@ Local FAISS instead of scalable DB
 [] Database: Scalable vector DB (e.g., Pinecone)
 
 [] Handle file upload as a background jobs.(e.g., celery)
+
+
+# Setup Guide
+
+* [**Setup Instruction:**](./docs/setup.md) Deep dive into the modular system design.
