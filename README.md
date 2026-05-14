@@ -105,4 +105,4 @@ Local FAISS instead of scalable DB
 
 # Setup Guide
 
-* [**Setup Instruction:**](./docs/setup.md) Deep dive into the modular system design.
+* [**Setup Instruction:**](./docs/setup.md) visit here for setup instruction.

@@ -51,7 +51,7 @@ feedback_analyzer = FeedbackAnalyzer(llm_client=llm_client)
 class RetrievalRequest(BaseModel):
     prompt: str
     top_k: int = 5
-    threshold: Optional[float] = None
+    threshold: Optional[float] = 1.0
 
 
 class RetrievalResult(BaseModel):

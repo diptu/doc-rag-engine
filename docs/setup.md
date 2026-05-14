@@ -60,7 +60,8 @@ The project uses Docker Compose to orchestrate the engine and its environment. R
 
 ```bash
 
-docker compose up --build
+docker compose build --no-cache
+docker compose up
 
 ```
 

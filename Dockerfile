@@ -7,19 +7,20 @@ ENV PYTHONUNBUFFERED 1
 
 WORKDIR /app
 
-# Install system dependencies for document processing and documentation
+# 1. Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libmagic-dev \
     tesseract-ocr \
     && rm -rf /var/lib/apt/lists/*
 
-# Install dependencies
+# 2. COPY THE FILE FIRST
 COPY requirements.txt .
-# Ensure mkdocs and the theme are installed
+
+# 3. NOW INSTALL
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt && \
-    pip install --no-cache-dir mkdocs mkdocs-readthedocs
+    pip install --no-cache-dir mkdocs
 
 # Copy project files
 COPY . .
