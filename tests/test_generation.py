@@ -1,6 +1,6 @@
 import pytest
 import json
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 from app.generation.generator import RAGGenerator
 from app.generation.schemas import GenerationResponse
 
@@ -19,8 +19,11 @@ MOCK_ML_CHUNKS = [
 
 @pytest.fixture
 def generator_instance():
-    """Provides a RAGGenerator with a mocked LLM client and Pydantic validation."""
+    """Provides a RAGGenerator with a mocked async LLM client and Pydantic validation."""
     mock_client = MagicMock()
+
+    # Critical Fix: Use AsyncMock for the completions create call
+    mock_client.chat.completions.create = AsyncMock()
 
     # Mocking a valid RAG response focusing on ML architecture
     content_json = json.dumps(
@@ -31,9 +34,12 @@ def generator_instance():
         }
     )
 
-    mock_client.chat.completions.create.return_value.choices[
-        0
-    ].message.content = content_json
+    # Setup the return value for the awaited call
+    mock_response = MagicMock()
+    mock_response.choices = [MagicMock()]
+    mock_response.choices[0].message.content = content_json
+    mock_client.chat.completions.create.return_value = mock_response
+
     # Initializing with a small token limit for testing truncation
     return RAGGenerator(mock_client, token_limit=4096), mock_client
 
@@ -51,10 +57,8 @@ def test_ml_context_serialization(generator_instance):
 def test_token_truncation_logic(generator_instance):
     """Ensures the generator respects the token limit and drops excessive chunks."""
     mock_client = MagicMock()
-    # Set an artificially low limit to force truncation
     small_limit_gen = RAGGenerator(mock_client, token_limit=100)
 
-    # Large chunk that exceeds 100 tokens
     large_chunks = [
         {
             "content": "Extremely long text... " * 50,
@@ -63,51 +67,55 @@ def test_token_truncation_logic(generator_instance):
     ]
 
     formatted = small_limit_gen._format_context(large_chunks)
-    assert (
-        formatted == ""
-    )  # Should be empty because the single chunk exceeded the reserved safety buffer
+    assert formatted == ""
 
 
-def test_grounded_ml_synthesis_object(generator_instance):
+@pytest.mark.asyncio
+async def test_grounded_ml_synthesis_object(generator_instance):
     """Ensure the generator returns a validated GenerationResponse object (not a dict)."""
     generator, _ = generator_instance
     query = "Explain the architecture of ResNet-50."
 
-    result = generator.generate(query, MOCK_ML_CHUNKS)
+    # Fix: Await the coroutine
+    result = await generator.generate(query, MOCK_ML_CHUNKS)
 
-    # Now asserting against Pydantic model attributes
     assert isinstance(result, GenerationResponse)
     assert "residual connections" in result.draft.lower()
     assert "he_et_al_2015" in result.citations
     assert result.confidence_score >= 0.9
 
 
-def test_pydantic_validation_error(generator_instance):
+@pytest.mark.asyncio
+async def test_pydantic_validation_error(generator_instance):
     """Checks that a ValidationError (via Pydantic) is raised if the LLM returns bad data types."""
     generator, mock_client = generator_instance
 
-    # Mock invalid data: confidence_score as a string instead of a float
     bad_json = json.dumps(
         {"draft": "Bad data", "citations": [], "confidence_score": "high"}
     )
-    mock_client.chat.completions.create.return_value.choices[
-        0
-    ].message.content = bad_json
 
-    with pytest.raises(Exception):  # Pydantic will raise ValidationError
-        generator.generate("Query", MOCK_ML_CHUNKS)
+    # Update the existing mock return value for this specific test
+    mock_response = MagicMock()
+    mock_response.choices = [MagicMock()]
+    mock_response.choices[0].message.content = bad_json
+    mock_client.chat.completions.create.return_value = mock_response
+
+    # Fix: Use Exception or ValidationError as target
+    with pytest.raises(Exception):
+        await generator.generate("Query", MOCK_ML_CHUNKS)
 
 
-def test_llm_hyperparameter_integrity(generator_instance):
+@pytest.mark.asyncio
+async def test_llm_hyperparameter_integrity(generator_instance):
     """Validates that ML system instructions and temperature are correctly sent."""
     generator, mock_client = generator_instance
     query = "How do residual blocks work?"
 
-    generator.generate(query, MOCK_ML_CHUNKS)
+    # Fix: Await the coroutine so call_args is populated
+    await generator.generate(query, MOCK_ML_CHUNKS)
 
     _, kwargs = mock_client.chat.completions.create.call_args
 
-    # Check Engineering Constraints
     assert kwargs["temperature"] == 0.1
     assert kwargs["response_format"] == {"type": "json_object"}
 
@@ -116,7 +124,8 @@ def test_llm_hyperparameter_integrity(generator_instance):
     assert "grounding" in system_prompt.lower()
 
 
-def test_zero_shot_hallucination_prevention(generator_instance):
+@pytest.mark.asyncio
+async def test_zero_shot_hallucination_prevention(generator_instance):
     """Test behavior when no relevant chunks are provided."""
     generator, mock_client = generator_instance
 
@@ -127,10 +136,13 @@ def test_zero_shot_hallucination_prevention(generator_instance):
             "confidence_score": 0.0,
         }
     )
-    mock_client.chat.completions.create.return_value.choices[
-        0
-    ].message.content = no_info_json
 
-    result = generator.generate("What about Transformer-XL?", [])
+    mock_response = MagicMock()
+    mock_response.choices = [MagicMock()]
+    mock_response.choices[0].message.content = no_info_json
+    mock_client.chat.completions.create.return_value = mock_response
+
+    # Fix: Await the coroutine
+    result = await generator.generate("What about Transformer-XL?", [])
     assert "do not have enough information" in result.draft
     assert len(result.citations) == 0
