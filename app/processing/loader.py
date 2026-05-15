@@ -5,8 +5,9 @@ import shutil
 from dataclasses import dataclass, field
 from typing import Any
 
-import fitz  # PyMuPDF
-import pytesseract
+# PyMuPDF
+import fitz  # type: ignore[import-untyped]
+import pytesseract  # type: ignore[import-untyped]
 from PIL import Image
 
 from app.processing.cleaner import TextCleaner

@@ -1,6 +1,7 @@
-import torch
+from typing import List, Optional, Union
+
 import numpy as np
-from typing import List, Union
+import torch
 from sentence_transformers import SentenceTransformer
 
 
@@ -10,7 +11,9 @@ class Embedder:
     Utilizes SentenceTransformers with automatic hardware acceleration detection.
     """
 
-    def __init__(self, model_name: str = "all-MiniLM-L6-v2", device: str = None):
+    def __init__(
+        self, model_name: str = "all-MiniLM-L6-v2", device: Optional[str] = None
+    ):
         """
         Initializes the embedding model.
 

@@ -1,4 +1,5 @@
 import pytest
+
 from app.processing.loader import DocumentLoader
 
 

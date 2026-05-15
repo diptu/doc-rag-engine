@@ -1,7 +1,9 @@
-import pytest
-import numpy as np
 import os
 import shutil
+
+import numpy as np
+import pytest
+
 from app.retrieval.vector_store import VectorStore
 
 

@@ -94,8 +94,9 @@ tasks:
       - pytest --cov=app --cov-report=term-missing
 
   lint:
-    desc: "Run mypy type checking"
+    desc: "Auto-organize imports and run mypy type checking"
     cmds:
+      - python -m isort app tests
       - python -m mypy app tests
 
   clean:

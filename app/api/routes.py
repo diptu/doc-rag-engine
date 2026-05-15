@@ -1,23 +1,23 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, BackgroundTasks
-from pydantic import BaseModel
-from typing import Any, List, Optional
 import os
+import shutil
+from typing import Any, List, Optional
 
 from dotenv import load_dotenv
-import shutil
+from fastapi import (APIRouter, BackgroundTasks, Depends, File, HTTPException,
+                     UploadFile)
 from openai import AsyncOpenAI
+from pydantic import BaseModel
 
-# Core Engine Imports
-from app.processing.loader import DocumentLoader
-from app.processing.chunker import TextChunker
-from app.retrieval.embedder import Embedder
-from app.retrieval.vector_store import VectorStore
-
+from app.feedback.analyzer import FeedbackAnalyzer
+from app.feedback.schemas import FeedbackSubmitRequest
 # Phase 3 & 4 Imports
 from app.generation.generator import RAGGenerator
 from app.generation.schemas import GenerationResponse
-from app.feedback.analyzer import FeedbackAnalyzer
-from app.feedback.schemas import FeedbackSubmitRequest
+from app.processing.chunker import TextChunker
+# Core Engine Imports
+from app.processing.loader import DocumentLoader
+from app.retrieval.embedder import Embedder
+from app.retrieval.vector_store import VectorStore
 
 load_dotenv()
 router = APIRouter()
@@ -69,7 +69,7 @@ class RAGRequest(BaseModel):
 
 @router.post("/ingest", tags=["Phase 1: Ingestion"])
 async def ingest_document(file: UploadFile = File(...)) -> dict[str, Any]:
-    if not file.filename.endswith(".pdf"):
+    if not file.filename or not file.filename.endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDFs supported.")
 
     os.makedirs("data/raw", exist_ok=True)

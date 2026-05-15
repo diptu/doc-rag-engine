@@ -1,7 +1,7 @@
-import json
 import datetime
+import json
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 
 class FeedbackStore:
@@ -34,7 +34,7 @@ class FeedbackStore:
                 "status": "No feedback data available yet.",
             }
 
-        stats = {
+        stats: Dict[str, Any] = {
             "total_interactions_analyzed": 0,
             "alignment_metrics": {
                 "average_edit_ratio": 0.0,

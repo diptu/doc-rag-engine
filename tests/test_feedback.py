@@ -1,6 +1,8 @@
-import pytest
 import json
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+
 from app.feedback.analyzer import FeedbackAnalyzer
 from app.feedback.schemas import FeedbackCategory, FeedbackEntry
 

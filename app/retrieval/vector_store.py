@@ -1,8 +1,9 @@
-import faiss
-import numpy as np
-import pickle
 import os
-from typing import List, Dict, Any, Optional
+import pickle
+from typing import Any, Dict, List, Optional
+
+import faiss  # type: ignore[import-untyped]
+import numpy as np
 
 
 class VectorStore:

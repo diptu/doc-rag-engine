@@ -1,7 +1,9 @@
 import json
 import logging
+from typing import Any, Dict, List
+
 import tiktoken
-from typing import List, Dict, Any
+
 from .prompt import RAG_SYSTEM_PROMPT, USER_PROMPT_TEMPLATE
 from .schemas import GenerationResponse
 

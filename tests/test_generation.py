@@ -1,6 +1,8 @@
-import pytest
 import json
 from unittest.mock import AsyncMock, MagicMock
+
+import pytest
+
 from app.generation.generator import RAGGenerator
 from app.generation.schemas import GenerationResponse
 

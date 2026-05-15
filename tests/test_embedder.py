@@ -1,6 +1,7 @@
-import pytest
 import numpy as np
+import pytest
 import torch
+
 from app.retrieval.embedder import Embedder
 
 
